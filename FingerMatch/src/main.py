@@ -38,7 +38,16 @@ class Image:
 
         plot_minutiae(self.image_enhanced, list(self.profile.keys()), size=8)
 
-
+class NumpyEncoder(json.JSONEncoder):
+    """ Special json encoder for numpy types """
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 class FingerMatch:
     def __init__(self, model: str = 'tree', threshold: int = 125):
         self.images = []
@@ -97,36 +106,44 @@ class FingerMatch:
 
                 # Confirmed point matching.
                 self.images[i].profile = generate_tuple_profile(minutiae)
-
+                
                 # Rewriting to the loaded data.
                 self.images[i].minutiae = minutiae
-
-        elif self.model.lower() == 'orb':
-            # Base data.
-            print('INFO: Training skipped.')
-
-        elif self.model.lower() == 'bf':
-            for i in range(len(self.images)):
-                # BFMatcher descriptors generation.
-                self.images[i].image_enhanced = enhance_image(self.images[i].image_raw, skeletonise=False)
-
-                # points, descriptors = edge_processing(self.images[i].image_enhanced, threshold=self.threshold)
-
-                points, descriptors = minutiae_points(self.images[i].image_enhanced)
-                self.images[i].descriptors = descriptors
-                # print(descriptors)
-                print(points)
 
         print(f'INFO: Training completed in {round(time.time() - start, 2)} sec')
 
     def save_as_pickle(self):
-        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/data.json", "wb") as output:
+        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/data.json", "wb") as output:
             pickle.dump(self.images, output)
 
+    def save_to_json(self):
+        ar = []
+        images = self.images
+        for i in images:
+            profileDict = {}
+            for x, y in i.profile.items():
+                profileDict[str(x)] = y
+            i.profile = profileDict
+            # print(json.dumps(i.__dict__, cls=NumpyEncoder))
+            ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
+        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "w") as op:
+            json.dump(ar, op)
+
     def load_from_pickle(self):
-        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/data.json", "rb") as f:
+        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/data.json", "rb") as f:
             self.images = pickle.load(f)
 
+    def load_from_json(self):
+        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "r") as f:
+            images = json.load(f)
+            for i in images:
+                profileDict = {}
+                img = json.loads(i)
+                print(img.keys())
+                for x, y in img["profile"].items():
+                    profileDict[tuple(x)] = y
+                img["profile"] = profileDict
+                self.images.append(img)
 
     def matchFingerprint(self, image: np.array, verbose: bool = False, match_th: int = 33):
         """
@@ -134,79 +151,32 @@ class FingerMatch:
         A similarity score is computed and used to determine the most likely match, if any.
 
         """
+        if self.model.lower() == 'tree':
 
-        if self.model.lower() == 'bf':
-            # BFMatcher and MES scorings.
-            scores = {}
+            img_test = enhance_image(image, skeletonise=True) # image input enhance
 
-            # Returns score, aims to minimise them for computing the best match.
-            # Test descriptors.
-            img = enhance_image(image, skeletonise=False)
-            points, descriptors = edge_processing(img, threshold=self.threshold)
-
-            for i in range(len(self.images)):
-                # Matching.
-                try:
-                    matches = match_edge_descriptors(self.images[i].descriptors, descriptors)
-                except AttributeError:
-                    raise Exception('ERROR: Model not trained - run trainData first.')
-
-                # Calculate score
-                score = sum([match.distance for match in matches])
-                # Using mes (mean edge score) = sum(match distance) / len(matches)
-                if len(matches) > 0:
-                    mes = score / len(matches)
-                    scores[self.images[i].img_id] = mes
-
-            scores = sorted(scores.items(), key=operator.itemgetter(1))
-
-            # Display most likely match
-            results = [{'img_id': s[0], 'score': round(s[1], 2), 'match': s[1] < match_th} for s in scores]
-
-            matches = [m for m in results if m['match']]
-            if len(matches) == 0:
-                print(f'No match found. Most similar fingerprint is {results[:5]}')
-            else:
-                print(f'INFO: Matches found, score: {matches}')
-
-            return scores
-
-        elif self.model.lower() == 'orb':
-            # Basic SIFT based ORB matcher.
-            for i in self.images:
-                sift_match(i.image_raw, image)
-
-        elif self.model.lower() == 'tree':
-
-            img_test = enhance_image(image, skeletonise=True)
-
-            minutiae_test = process_minutiae(img_test)
+            minutiae_test = process_minutiae(img_test) ## all minutiae 
             # Confirmed point matching.
-            img_profile = generate_tuple_profile(minutiae_test)
+            img_profile = generate_tuple_profile(minutiae_test) # all profile
 
             matchest_fingerprint = self.images[0]
             match_point = 0
 
             for i in range(len(self.images)):
                 # Matching.
-                common_points_base, common_points_test = match_tuples(self.images[i].profile, img_profile)
+                # So diem minutiae trung nhau giua 2 anh
+                common_points_base, common_points_test = match_tuples(self.images[i]["profile"], img_profile)
 
                 # if evaluate(common_points_base, self.images[i].minutiae, minutiae_test):
                 #     print(f'Match with {self.images[i].img_id}')
                 # else:
                 #     print(f'Not a match with {self.images[i].img_id}')
 
-                minutiae_score = max(len(self.images[i].profile), len(img_profile)) / 2
+                # So diem minutiae max giua 2 anh(anh dau vao va anh dang truy van) 
+                minutiae_score = max(len(self.images[i]["profile"]), len(img_profile))
 
                 if len(common_points_base) / minutiae_score > match_point:
-                    match_point = len(common_points_base) / minutiae_score
+                    match_point = len(common_points_base) / minutiae_score #So diem trung nhau cua anh dau vao va anh truy van / max
                     matchest_fingerprint = self.images[i]
 
-            print(f'Matches fingerprint is {matchest_fingerprint.img_id} with points: {match_point}')
-
-
-        elif self.model == 'cnn':
-            pass
-
-        else:
-            print('INFO: Not implemented yet.')
+            print(f'Matching fingerprint is {matchest_fingerprint["img_id"]} with points: {match_point}')

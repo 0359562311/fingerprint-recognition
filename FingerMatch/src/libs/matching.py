@@ -53,7 +53,7 @@ def match_tuples(tuple_base: dict, tuple_test: dict, th_range: float = .5, th_an
 
         matching_ratios = ((ratios_test + th_range) >= ratios) * (ratios_test - th_range <= ratios)
         matching_angles = ((angles_test + th_angle) >= angles) * (angles_test - th_angle <= angles)
-
+        
         matches = ((matching_ratios * ratios_test) * (matching_angles * angles_test) > 0).sum(1)
 
         if matches.max() >= 2:
