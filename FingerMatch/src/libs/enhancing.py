@@ -25,7 +25,6 @@ def enhance_image(image: np.array, block_orientation: int = 16, threshold: float
     Fingerprint image enhancement: Algorithm and performance evaluation'. 
     IEEE Transactions on Pattern Analysis and Machine Intelligence 20, 8 (1998), pp 777-789.
     License: BSD 2
-    
     """
 
     # CLAHE adjusted image - histogram equalisation.

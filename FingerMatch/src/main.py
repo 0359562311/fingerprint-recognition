@@ -202,7 +202,7 @@ class FingerMatch:
                     match_point = len(common_points_base) / minutiae_score
                     matchest_fingerprint = self.images[i]
 
-            print(f'Matches fingerprint is {matchest_fingerprint.img_id} with points: {match_point}')
+            print(f'Matchest fingerprint is {matchest_fingerprint.img_id} with points: {match_point}')
 
 
         elif self.model == 'cnn':
