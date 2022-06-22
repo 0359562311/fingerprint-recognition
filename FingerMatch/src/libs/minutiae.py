@@ -190,7 +190,7 @@ def generate_tuple_profile(minutiae: list) -> dict:
         # Angles are given a +/- 3.5 degree range to match. To match sourcing device discrepancies.
         ratios_angles = extract_tuple_profile(distance_matrix[i], m, minutiae)
         tuples[m] = np.round(ratios_angles, 2)
-
+        
     return tuples
 
 
