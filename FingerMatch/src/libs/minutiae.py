@@ -13,22 +13,17 @@ def extract_minutiae(image: np.array):
     Crossing number technique for minutiae extraction from skeletonised binarised images 
     Based on http://airccse.org/journal/ijcseit/papers/2312ijcseit01.pdf
     Requires binarised image array with integer values in [0, 1]. Where 1 is ridge.
-
     Args:
         image (np.array): Image as a numpy array - 1 channel gray-scale, with white background
-
     Returns:
         list: [terminations, bifurcations] - extracted from the given image. 
                     terminations (list) - tuple coordinates for the location of a ridge termination
                     bifurcations (list) - tuple coordinates for the location of a ridge bifurcation
-
     """
 
     # Index order list - defines the order in which the pixels in a 3x3 frame are considered.
     idx = [(1, -1), (0, -1), (0, 1), (0, 0), (1, 0), (-1, 0), (-1, 1), (-1, -1), (1, -1)]
     # idx = [(0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1), (1,0), (1,1),(0,1)]
-
-    debug = False
 
     height, width = image.shape
 
@@ -51,12 +46,10 @@ def extract_minutiae(image: np.array):
             # pixel_sum = .5 * sum([abs(frame[idx[i]] - frame[idx[i + 1]]) for i in range(len(idx) - 1)])
 
             if pixel_sum == 1:
-
                 # Add termination coordinates
                 terminations.append((i, j))
 
             elif pixel_sum == 3:
-
                 # Add bifurcation coordinates
                 bifurcations.append((i, j))
 
@@ -110,8 +103,10 @@ def extract_tuple_profile(distances: list, m: tuple, minutiae: list) -> list:
     """
 
     # Closest minutiae to the current minutiae
+    
     closest_distances = sorted(distances)[1:6]
     closest_indices = [list(distances).index(d) for d in closest_distances]
+    # lay 5 diem gan nhat voi diem dang xet (m)
     closest_minutiae = [minutiae[i] for i in closest_indices]
 
     # Unique pair ratios.
@@ -122,12 +117,14 @@ def extract_tuple_profile(distances: list, m: tuple, minutiae: list) -> list:
     # i-i4 : i-i5
     unique_pairs = list(combinations(closest_distances, 2))
     # 2 decimal rounded ratios of max of the two distances divided by their minimum.
+    # tinh ti le khong cach cua 5C2
     compute_ratios = [round(max(p[0], p[1]) / min(p[0], p[1]), 2) for p in unique_pairs]
 
     # Angle computation.
     minutiae_combinations = list(combinations(closest_minutiae, 2))
 
     # Angle between the segments drawn from m to the two other minutae with varying distances.
+    # tinh goc dua vao vector tao boi 3 diem
     minutiae_angles = [round(extract_angle((m, x), (m, y)), 2) for x, y in minutiae_combinations]
 
     return [compute_ratios, minutiae_angles]

@@ -32,6 +32,7 @@ def match_tuples(tuple_base: dict, tuple_test: dict, th_range: float = .5, th_an
 
     """
 
+    # danh sach ti le do dai va cac thong so goc cua hinh anh test
     ratios_test = np.array([ratios for c, [ratios, _] in tuple_test.items()])
     angles_test = np.array([angles for c, [_, angles] in tuple_test.items()])
 
@@ -40,28 +41,18 @@ def match_tuples(tuple_base: dict, tuple_test: dict, th_range: float = .5, th_an
 
     # Tuple-wise comparison with all tuple profiles in the test image.
     for i, (m, [ratios, angles]) in enumerate(tuple_base.items()):
-        # Explore matching ratios.
-        matching_values = (ratios_test == ratios).sum(1)
-
-        # Tuples found to match with this base tuple. 
-        matching_indices = np.where((matching_values == matching_values.max()) & (matching_values >= 2))[0]
-
-        if len(matching_indices) == 0:
-            continue
-        else:
-            matching_indices = matching_indices[0]
 
         matching_ratios = ((ratios_test + th_range) >= ratios) * (ratios_test - th_range <= ratios)
         matching_angles = ((angles_test + th_angle) >= angles) * (angles_test - th_angle <= angles)
         
         matches = ((matching_ratios * ratios_test) * (matching_angles * angles_test) > 0).sum(1)
+        # diem ma co ti le do dai va goc trong nguong threshold >= 2/10
 
         if matches.max() >= 2:
             # Ratios and angles belonging to the current tuple are matched with 2 or
             # more ratios and angles from another tuple from the test image. 
             # This is a confirmed common point.
             common_points_base.append(m)
-            common_points_test.append(list(tuple_test.keys())[matching_indices])
 
     return common_points_base, common_points_test
 

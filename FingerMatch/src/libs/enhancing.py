@@ -28,6 +28,7 @@ def enhance_image(image: np.array, block_orientation: int = 16, threshold: float
     """
 
     # CLAHE adjusted image - histogram equalisation.
+    # can bang do tuong phan anh
     img_clahe = apply_clahe(image)
 
     # Padding image for applying window frequency mask.
@@ -36,9 +37,11 @@ def enhance_image(image: np.array, block_orientation: int = 16, threshold: float
         img_clahe = cv2.copyMakeBorder(img_clahe, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255)
 
     # Normalise images
+    # chuan hoa z-score
     img_normalised, mask = ridge_segment(img_clahe, block_orientation, threshold)
 
     # Pixel orientation
+    # trich xuat huong cua duong van
     img_orientation = ridge_orient(img_normalised, sigma_gradient, sigma_block, sigma_orientation)
 
     # Ridge frequency
@@ -368,8 +371,8 @@ def apply_clahe(image: np.array, clip_limit: float = 2.0, tile_grid_size: tuple 
     Contrast Limited Adaptive Histogram Equalization
     
     """
-    # clipLimit: Nguong gioi han do tuong phan
-    # tileGridSize; Chia anh dau vao thanh cac o MxN sau do ap dung can bang histogram theo tung o.
+    # clipLimit: Nguong gioi han do tuong phan 
+    # tileGridSize; Chia anh dau vao thanh cac o MxN sau do ap dung can bang histogram theo tung o de giam nhieu.
 
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
 

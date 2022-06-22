@@ -116,7 +116,7 @@ class FingerMatch:
         print(f'INFO: Training completed in {round(time.time() - start, 2)} sec')
 
     def save_as_pickle(self):
-        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/data.json", "wb") as output:
+        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt.json", "wb") as output:
             pickle.dump(self.images, output)
 
     def save_to_json(self):
@@ -133,7 +133,7 @@ class FingerMatch:
             i.minutiae = None
             # print(json.dumps(i.__dict__, cls=NumpyEncoder))
             ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
-        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "w") as op:
+        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt.json", "w") as op:
             json.dump(ar, op)
 
     def load_from_pickle(self):
@@ -141,7 +141,7 @@ class FingerMatch:
             self.images = pickle.load(f)
 
     def load_from_json(self):
-        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt2.json", "r") as f:
+        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt.json", "r") as f:
             images = json.load(f)
             minutiae = []
             for i in images:
@@ -175,11 +175,6 @@ class FingerMatch:
                 # Matching.
                 # So diem minutiae trung nhau giua 2 anh
                 common_points_base, common_points_test = match_tuples(self.images[i]["profile"], img_profile)
-
-                # if evaluate(common_points_base, self.images[i].minutiae, minutiae_test):
-                #     print(f'Match with {self.images[i].img_id}')
-                # else:
-                #     print(f'Not a match with {self.images[i].img_id}')
 
                 # So diem minutiae max giua 2 anh(anh dau vao va anh dang truy van) 
                 minutiae_score = max(len(self.images[i]["profile"]), len(img_profile), 1)
