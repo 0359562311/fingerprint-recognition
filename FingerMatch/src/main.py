@@ -124,6 +124,10 @@ class FingerMatch:
             for x, y in i.profile.items():
                 profileDict[str(x)] = y
             i.profile = profileDict
+            i.image_raw = None
+            i.path = None
+            i.image_enhanced = None
+            i.minutiae = None
             # print(json.dumps(i.__dict__, cls=NumpyEncoder))
             ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
         with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "w") as op:
@@ -136,13 +140,15 @@ class FingerMatch:
     def load_from_json(self):
         with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "r") as f:
             images = json.load(f)
+            minutiae = []
             for i in images:
                 profileDict = {}
                 img = json.loads(i)
-                print(img.keys())
                 for x, y in img["profile"].items():
                     profileDict[tuple(x)] = y
+                    minutiae.append(tuple(x))
                 img["profile"] = profileDict
+                img["minutiae"] = minutiae
                 self.images.append(img)
 
     def matchFingerprint(self, image: np.array, verbose: bool = False, match_th: int = 33):

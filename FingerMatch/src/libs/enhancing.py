@@ -369,6 +369,8 @@ def apply_clahe(image: np.array, clip_limit: float = 2.0, tile_grid_size: tuple 
     Contrast Limited Adaptive Histogram Equalization
     
     """
+    # clipLimit: Nguong gioi han do tuong phan
+    # tileGridSize; Chia anh dau vao thanh cac o MxN sau do ap dung can bang histogram theo tung o.
 
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
 
