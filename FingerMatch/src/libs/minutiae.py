@@ -26,6 +26,7 @@ def extract_minutiae(image: np.array):
 
     # Index order list - defines the order in which the pixels in a 3x3 frame are considered.
     idx = [(1, -1), (0, -1), (0, 1), (0, 0), (1, 0), (-1, 0), (-1, 1), (-1, -1), (1, -1)]
+    # idx = [(0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1), (1,0), (1,1),(0,1)]
 
     debug = False
 
@@ -50,21 +51,11 @@ def extract_minutiae(image: np.array):
             # pixel_sum = .5 * sum([abs(frame[idx[i]] - frame[idx[i + 1]]) for i in range(len(idx) - 1)])
 
             if pixel_sum == 1:
-                # Termination
-                if debug:
-                    # Displays a larger frame for debugging purposes.
-                    print(f'Termination: {i}, {j}')
-                    display_image(image[i - 2: i + 3, j - 2: j + 3])
 
                 # Add termination coordinates
                 terminations.append((i, j))
 
             elif pixel_sum == 3:
-                # Bifurcation
-                if debug:
-                    # Displays a larger frame for debugging purposes.
-                    print(f'Bifurcation: {i}, {j}')
-                    display_image(image[i - 2: i + 3, j - 2: j + 3])
 
                 # Add bifurcation coordinates
                 bifurcations.append((i, j))

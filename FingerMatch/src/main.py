@@ -101,14 +101,17 @@ class FingerMatch:
         if self.model.lower() == 'tree':
             for i in range(len(self.images)):
                 # Extract minutiae.
-                self.images[i].image_enhanced = enhance_image(self.images[i].image_raw, skeletonise=True)
-                minutiae = process_minutiae(self.images[i].image_enhanced)
+                try:
+                    self.images[i].image_enhanced = enhance_image(self.images[i].image_raw, skeletonise=True)
+                    minutiae = process_minutiae(self.images[i].image_enhanced)
 
-                # Confirmed point matching.
-                self.images[i].profile = generate_tuple_profile(minutiae)
-                
-                # Rewriting to the loaded data.
-                self.images[i].minutiae = minutiae
+                    # Confirmed point matching.
+                    self.images[i].profile = generate_tuple_profile(minutiae)
+                    
+                    # Rewriting to the loaded data.
+                    self.images[i].minutiae = minutiae
+                except:
+                    pass
 
         print(f'INFO: Training completed in {round(time.time() - start, 2)} sec')
 
@@ -120,13 +123,16 @@ class FingerMatch:
         ar = []
         images = self.images
         for i in images:
-            profileDict = {}
-            for x, y in i.profile.items():
-                profileDict[str(x)] = y
-            i.profile = profileDict
-            # print(json.dumps(i.__dict__, cls=NumpyEncoder))
-            ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
-        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "w") as op:
+            try:
+                profileDict = {}
+                for x, y in i.profile.items():
+                    profileDict[str(x)] = y
+                i.profile = profileDict
+                # print(json.dumps(i.__dict__, cls=NumpyEncoder))
+                ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
+            except:
+                pass
+        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt2.json", "w") as op:
             json.dump(ar, op)
 
     def load_from_pickle(self):
@@ -134,12 +140,11 @@ class FingerMatch:
             self.images = pickle.load(f)
 
     def load_from_json(self):
-        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "r") as f:
+        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt2.json", "r") as f:
             images = json.load(f)
             for i in images:
                 profileDict = {}
                 img = json.loads(i)
-                print(img.keys())
                 for x, y in img["profile"].items():
                     profileDict[tuple(x)] = y
                 img["profile"] = profileDict
@@ -173,7 +178,7 @@ class FingerMatch:
                 #     print(f'Not a match with {self.images[i].img_id}')
 
                 # So diem minutiae max giua 2 anh(anh dau vao va anh dang truy van) 
-                minutiae_score = max(len(self.images[i]["profile"]), len(img_profile))
+                minutiae_score = max(len(self.images[i]["profile"]), len(img_profile), 1)
 
                 if len(common_points_base) / minutiae_score > match_point:
                     match_point = len(common_points_base) / minutiae_score #So diem trung nhau cua anh dau vao va anh truy van / max
