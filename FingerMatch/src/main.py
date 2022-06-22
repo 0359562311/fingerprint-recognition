@@ -123,16 +123,17 @@ class FingerMatch:
         ar = []
         images = self.images
         for i in images:
-            try:
-                profileDict = {}
-                for x, y in i.profile.items():
-                    profileDict[str(x)] = y
-                i.profile = profileDict
-                # print(json.dumps(i.__dict__, cls=NumpyEncoder))
-                ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
-            except:
-                pass
-        with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt2.json", "w") as op:
+            profileDict = {}
+            for x, y in i.profile.items():
+                profileDict[str(x)] = y
+            i.profile = profileDict
+            i.image_raw = None
+            i.path = None
+            i.image_enhanced = None
+            i.minutiae = None
+            # print(json.dumps(i.__dict__, cls=NumpyEncoder))
+            ar.append(json.dumps(i.__dict__, cls=NumpyEncoder))
+        with open("/home/hoangdo/Documents/python/fingerprint-recognition/FingerMatch/src/dt.json", "w") as op:
             json.dump(ar, op)
 
     def load_from_pickle(self):
@@ -142,12 +143,15 @@ class FingerMatch:
     def load_from_json(self):
         with open("/home/tan/Documents/PythonProjects/AI/FingerMatch-20220508T085804Z-001/FingerMatch/src/dt2.json", "r") as f:
             images = json.load(f)
+            minutiae = []
             for i in images:
                 profileDict = {}
                 img = json.loads(i)
                 for x, y in img["profile"].items():
                     profileDict[tuple(x)] = y
+                    minutiae.append(tuple(x))
                 img["profile"] = profileDict
+                img["minutiae"] = minutiae
                 self.images.append(img)
 
     def matchFingerprint(self, image: np.array, verbose: bool = False, match_th: int = 33):
